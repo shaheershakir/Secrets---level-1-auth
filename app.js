@@ -1,4 +1,5 @@
 //jshint esversion:6https://account.mongodb.com/account/login?_ga=2.75797206.251272254.1695667157-1935144575.1693796998
+require('dotenv').config()
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -13,9 +14,8 @@ app.use(bodyParser.urlencoded({
     extended: true 
 }));
 
-//twECKETBx1gD7h5Q
-
-mongoose.connect("mongodb+srv://shaheershakir22:twECKETBx1gD7h5Q@secret.jje0jfd.mongodb.net/?retryWrites=true&w=majority")
+const uri = process.env.MONGO_URI;
+mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
 
 if (mongoose.connection.readyState === 1) {
     console.log('Mongoose is connected');
@@ -28,8 +28,8 @@ const userSchema = new mongoose.Schema({
     password: String
 });
 
-const secret = "thisisourlittlesecret.";
-userSchema.plugin(encrypt, {secret: secret, encryptedFields: ["password"]});
+
+userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ["password"]});
 
 const User = new mongoose.model("User", userSchema)
 
