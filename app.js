@@ -4,7 +4,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose")
-const md5 = require("md5");
+const bcrypt = require("bcrypt");
+
+const saltRounds = 10;
 
 const app = express();
 
@@ -44,9 +46,13 @@ app.get("/register", function(req, res) {
 
 
 app.post("/register", (req, res) => {
+
+    const hash = bcrypt.hashSync(req.body.password, saltRounds);
+    // Store hash in your password DB.
+
     const newUser = new User({
         email: req.body.username,
-        password: md5(req.body.password)
+        password: hash
     });
 
     newUser.save()
@@ -68,9 +74,8 @@ app.post("/login", (req, res) => {
     User.findOne({email: username})
     .then((foundUser) => {
         if (foundUser) {
-            if (foundUser.password === password) {
+            bcrypt.compareSync(foundUser.password, hash);
                 res.render("secrets")
-            }
         }
     })
     .catch((err) => {
